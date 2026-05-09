@@ -1,6 +1,14 @@
 from flask import request, jsonify
+
+from flask_jwt_extended import (
+    create_access_token,
+    jwt_required,
+    get_jwt_identity
+)
+
 from models import User, Prediction
 from database import db
+
 import bcrypt
 
 
@@ -43,7 +51,7 @@ def register_routes(app):
 
         return jsonify({
             "message": "User registered successfully"
-        })
+        }), 201
 
 
     # LOGIN API
@@ -60,33 +68,51 @@ def register_routes(app):
 
         if not user:
             return jsonify({
-                "error": "User not found"
-            }), 404
+                "error": "Invalid email or password"
+            }), 401
 
         # Check password
-        if bcrypt.checkpw(
+        password_correct = bcrypt.checkpw(
             password.encode('utf-8'),
             user.password.encode('utf-8')
-        ):
+        )
 
+        if not password_correct:
             return jsonify({
-                "message": "Login successful",
-                "user_id": user.id
-            })
+                "error": "Invalid email or password"
+            }), 401
+
+        # Create JWT Token
+        access_token = create_access_token(
+            identity=str(user.id)
+        )
 
         return jsonify({
-            "error": "Invalid password"
-        }), 401
+            "message": "Login successful",
+            "token": access_token,
+            "user": {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email
+            }
+        }), 200
 
 
     # PREDICT API
     @app.route('/predict', methods=['POST'])
+    @jwt_required()
     def predict():
+
+        current_user_id = get_jwt_identity()
 
         data = request.get_json()
 
-        user_id = data['user_id']
         symptoms = data['symptoms']
+
+        if not symptoms:
+            return jsonify({
+                "error": "Symptoms are required"
+            }), 400
 
         # Dummy prediction for now
         prediction = "Flu"
@@ -94,7 +120,7 @@ def register_routes(app):
 
         # Save prediction
         new_prediction = Prediction(
-            user_id=user_id,
+            user_id=current_user_id,
             symptoms=",".join(symptoms),
             prediction=prediction,
             confidence=confidence
@@ -106,24 +132,29 @@ def register_routes(app):
         return jsonify({
             "prediction": prediction,
             "confidence": confidence
-        })
+        }), 200
 
 
     # HISTORY API
-    @app.route('/history/<int:user_id>', methods=['GET'])
-    def history(user_id):
+    @app.route('/history', methods=['GET'])
+    @jwt_required()
+    def history():
+
+        current_user_id = get_jwt_identity()
 
         predictions = Prediction.query.filter_by(
-            user_id=user_id
+            user_id=current_user_id
         ).all()
 
         result = []
 
         for p in predictions:
+
             result.append({
                 "prediction": p.prediction,
                 "symptoms": p.symptoms,
-                "confidence": p.confidence
+                "confidence": p.confidence,
+                "created_at": p.created_at
             })
 
-        return jsonify(result)
+        return jsonify(result), 200
