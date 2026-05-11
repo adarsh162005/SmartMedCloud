@@ -1,4 +1,15 @@
+
+import sys
+import os
+
+# Add project root to Python path
+sys.path.append(
+    os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..")
+    )
+)
 from flask import request, jsonify
+from ai_model.predict import predict
 
 from flask_jwt_extended import (
     create_access_token,
@@ -101,22 +112,25 @@ def register_routes(app):
     # PREDICT API
     @app.route('/predict', methods=['POST'])
     @jwt_required()
-    def predict():
+    def predict_route():
 
         current_user_id = get_jwt_identity()
 
         data = request.get_json()
 
-        symptoms = data['symptoms']
+        symptoms = data.get('symptoms')
 
         if not symptoms:
             return jsonify({
                 "error": "Symptoms are required"
             }), 400
 
-        # Dummy prediction for now
-        prediction = "Flu"
-        confidence = "87%"
+       
+
+        result = predict(symptoms)
+
+        prediction = result["prediction"]
+        confidence = result["confidence"]
 
         # Save prediction
         new_prediction = Prediction(
@@ -157,4 +171,5 @@ def register_routes(app):
                 "created_at": p.created_at
             })
 
-        return jsonify(result), 200
+        return jsonify({"history": result}), 200
+        #return jsonify(result), 200

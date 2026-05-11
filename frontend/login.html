@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Login</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body onload="initializeTheme()">
+
+<nav>
+
+    <h2>SmartMed Cloud</h2>
+
+    <div class="nav-links">
+
+        <button class="theme-btn"
+                onclick="toggleTheme()">
+            🌙
+        </button>
+
+        <a href="index.html">Home</a>
+        <a href="register.html">Register</a>
+
+    </div>
+
+</nav>
+
+<div class="auth-container">
+
+    <div class="card auth-card slide-up">
+
+        <h1>Login</h1>
+
+        <input type="email"
+               id="email"
+               placeholder="Enter Email">
+
+        <input type="password"
+               id="password"
+               placeholder="Enter Password">
+
+        <button onclick="loginUser()">
+            Login
+        </button>
+
+        <p id="loginMessage"></p>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
