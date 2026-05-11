@@ -102,6 +102,14 @@ SmartMedCloud/
 
 ---
 
+## Live Demo
+
+Frontend: https://smart-med-cloud.vercel.app
+
+Backend API: https://smartmed-backend-h7qx.onrender.com
+
+---
+
 # API Endpoints
 
 ## Register User
