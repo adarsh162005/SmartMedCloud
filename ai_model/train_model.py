@@ -20,7 +20,7 @@ from catboost import CatBoostClassifier
 # LOAD DATASET
 # =========================================================
 
-dataset_df = pd.read_csv("dataset.csv")
+dataset_df = pd.read_csv("ai_model/dataset.csv")
 
 # =========================================================
 # HANDLE MISSING VALUES
